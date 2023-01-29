@@ -48,6 +48,7 @@ struct CANON_TOOL_TABLE tooldata_entry_init()
     tdata.backangle   =  0;
     tdata.orientation =  0;
     ZERO_EMC_POSE(tdata.offset);
+    tdata.comment[0]  =  0;
 
     return tdata;
 } // tooldata_entry_init()
@@ -208,6 +209,18 @@ int tooldata_read_entry(const char *input_line,
         tdata.frontangle  = frontangle;
         tdata.backangle   = backangle;
         tdata.orientation = orientation;
+        if (comment) {
+            strncpy(tdata.comment,comment,CANON_TOOL_COMMENT_SIZE-1);
+            tdata.comment[CANON_TOOL_COMMENT_SIZE-1] = 0;
+            if (strlen(comment) > (CANON_TOOL_COMMENT_SIZE-1) ) {
+                fprintf(stderr,"%s():comment for toolno %d truncated to %d chars:\n   <%s>\n"
+                       ,__FUNCTION__
+                       ,tdata.toolno
+                       ,CANON_TOOL_COMMENT_SIZE-1
+                       ,tdata.comment
+                       );
+            }
+        }
         if (tooldata_put(tdata,idx) == IDX_FAIL) {
             UNEXPECTED_MSG;
         }
