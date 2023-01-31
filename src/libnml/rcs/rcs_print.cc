@@ -300,15 +300,16 @@ int rcs_vprint(const char *_fmt, va_list _args, int save_string)
     }
     if (save_string) {
 	if (!error_bufs_initialized) {
-	    memset(last_error_bufs[0], 0, 100);
-	    memset(last_error_bufs[1], 0, 100);
-	    memset(last_error_bufs[2], 0, 100);
-	    memset(last_error_bufs[3], 0, 100);
+	    memset(last_error_bufs[0], 0, error_buf_size);
+	    memset(last_error_bufs[1], 0, error_buf_size);
+	    memset(last_error_bufs[2], 0, error_buf_size);
+	    memset(last_error_bufs[3], 0, error_buf_size);
 	    error_bufs_initialized = 1;
 	}
 	last_error_buf_filled++;
 	last_error_buf_filled %= 4;
-	strncpy(last_error_bufs[last_error_buf_filled], temp_string, 99);
+	strncpy(last_error_bufs[last_error_buf_filled], temp_string, error_buf_size);
+	last_error_bufs[last_error_buf_filled][error_buf_size - 1] = '\0';
     }
     return (rcs_fputs(temp_string));
 }
@@ -369,7 +370,7 @@ int rcs_fputs(const char *_str)
 	    break;
 	case RCS_PRINT_TO_FILE:
 	    if (NULL == rcs_print_file_stream) {
-		if (NULL == rcs_print_file_name) {
+		if (strlen(rcs_print_file_name) == 0) {
 		    return EOF;
 		}
 		rcs_print_file_stream = fopen(rcs_print_file_name, "a+");
